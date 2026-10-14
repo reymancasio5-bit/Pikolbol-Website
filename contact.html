@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Contact | ASAY PIKOL CLUB</title>
+<meta name="description" content="Message the Asay Pikol Club team.">
+<meta name="theme-color" content="#060a11">
+<meta property="og:title" content="Contact | ASAY PIKOL CLUB"><meta property="og:description" content="Message the Asay Pikol Club team."><meta property="og:type" content="website">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23d9ff3f'/%3E%3Ccircle cx='24' cy='24' r='4' fill='%2333420a'/%3E%3Ccircle cx='40' cy='26' r='4' fill='%2333420a'/%3E%3Ccircle cx='30' cy='40' r='4' fill='%2333420a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="contact">
+<main id="main">
+
+<section class="page-hero" data-tint="teal"><div class="wrap">
+<span class="eyebrow"><i class="fa-solid fa-comments"></i> Contact us</span>
+<h1 data-split>Let's talk pickleball</h1>
+<p class="lead">Questions, lessons, group bookings or sponsorships? Send us a message and we'll get right back to you.</p>
+</div></section>
+<section data-tint="lime" style="padding-top:20px"><div class="wrap two" style="align-items:start">
+<div class="card" data-r="left" style="padding:clamp(24px,4vw,40px)"><h3 style="font-size:2.2rem;margin-bottom:20px">Send a message</h3>
+<form id="cForm" novalidate>
+<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+<div class="row"><label>Your name<input name="name" required autocomplete="name"></label><label>Email<input name="email" type="email" required autocomplete="email"></label></div>
+<div class="row"><label>Phone (optional)<input name="phone" type="tel" autocomplete="tel"></label>
+<label>Topic<select name="topic"><option>Join a session</option><option>Lessons / coaching</option><option>Group or event booking</option><option>Sponsorship</option><option>Other</option></select></label></div>
+<label>Message<textarea name="message" required placeholder="Tell us how we can help"></textarea></label>
+<div class="note" id="cNote" role="status"></div>
+<button class="btn" type="submit"><i class="fa-solid fa-paper-plane"></i> Send message</button></form></div>
+<div class="grid g2" id="cInfo" data-stagger style="margin-top:0"></div>
+</div></section>
+<section data-tint="blue"><div class="wrap"><span class="eyebrow" data-r>Visit us</span><h2 data-title>Find the courts</h2>
+<div id="map" data-r="zoom" style="margin-top:40px;height:min(460px,60vh);border-radius:26px;overflow:hidden;border:1px solid var(--line);background:var(--glass)"></div></div></section>
+<section data-tint="orange"><div class="wrap center"><span class="eyebrow">Follow the fun</span><h2 data-title>Join the community</h2>
+<div class="socials" style="justify-content:center;margin-top:30px" id="cSocial"></div></div></section>
+
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/scene.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/pages.js"></script>
+</body>
+</html>

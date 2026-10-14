@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Game Schedule | ASAY PIKOL CLUB</title>
+<meta name="description" content="Open play schedule. Pick a session and reserve your spot.">
+<meta name="theme-color" content="#060a11">
+<meta property="og:title" content="Game Schedule | ASAY PIKOL CLUB"><meta property="og:description" content="Open play schedule. Pick a session and reserve your spot."><meta property="og:type" content="website">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23d9ff3f'/%3E%3Ccircle cx='24' cy='24' r='4' fill='%2333420a'/%3E%3Ccircle cx='40' cy='26' r='4' fill='%2333420a'/%3E%3Ccircle cx='30' cy='40' r='4' fill='%2333420a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="schedule">
+<main id="main">
+
+<section class="page-hero" data-tint="lime"><div class="wrap">
+<span class="eyebrow"><i class="fa-regular fa-calendar"></i> Open play</span>
+<h1 data-split>Game schedule</h1>
+<p class="lead">Pick a session, tap Reserve, and show up ready to play. New sessions are added all the time.</p>
+</div></section>
+<section data-tint="blue" style="padding-top:20px"><div class="wrap">
+<h3 style="color:var(--muted);font-size:1rem;letter-spacing:.2em">Day</h3><div class="filters" id="dayFilters" style="margin-top:12px"></div>
+<h3 style="color:var(--muted);font-size:1rem;letter-spacing:.2em;margin-top:26px">Level</h3><div class="filters" id="lvlFilters" style="margin-top:12px"></div>
+<div id="sessList"><div class="empty" style="margin-top:34px">Loading schedule…</div></div>
+</div></section>
+
+<section data-tint="teal"><div class="wrap"><div class="grid g3" data-stagger style="margin-top:0">
+<div class="card"><div class="ico"><i class="fa-solid fa-circle-info"></i></div><h3>Before you come</h3><p>Arrive 10–15 minutes early for check-in and warm-up.</p></div>
+<div class="card"><div class="ico o"><i class="fa-solid fa-money-bill-wave"></i></div><h3>Payment</h3><p>Pay at the court. Fees are shown on each session.</p></div>
+<div class="card"><div class="ico b"><i class="fa-solid fa-ban"></i></div><h3>Can't make it?</h3><p>Let us know so someone else can take your slot.</p></div></div></div></section>
+
+<div class="modal" id="resModal" role="dialog" aria-modal="true" aria-labelledby="resTitle"><div class="box">
+<button class="x" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+<span class="tag">Reserve a spot</span><h3 id="resTitle">Session</h3><p id="resInfo" style="color:var(--muted);margin-bottom:20px"></p>
+<form id="resForm" novalidate>
+<input type="hidden" name="sid"><input type="hidden" name="stitle"><input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+<div class="row"><label>Your name<input name="name" required autocomplete="name" placeholder="Juan Dela Cruz"></label>
+<label>Mobile number<input name="phone" type="tel" required autocomplete="tel" placeholder="0900 000 0000"></label></div>
+<div class="row"><label>Email (optional)<input name="email" type="email" autocomplete="email" placeholder="you@email.com"></label>
+<label>Date<input name="date" type="date" required></label></div>
+<div class="row"><label>Players<select name="players"><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+<label>Your level<select name="level"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></label></div>
+<label>Notes (optional)<textarea name="notes" style="min-height:80px" placeholder="Anything we should know?"></textarea></label>
+<div class="note" id="resNote" role="status"></div>
+<button class="btn" type="submit"><i class="fa-solid fa-paper-plane"></i> Send reservation</button>
+</form></div></div>
+
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/scene.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/pages.js"></script>
+</body>
+</html>
