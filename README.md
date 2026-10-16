@@ -29,7 +29,9 @@ The owner can now go to `/admin.html`, enter the passcode and add/edit/delete sc
 | Messages | filled by the contact form |
 
 ## 3. Background videos
-Drop `.mp4` / `.webm` clips into `assets/videos/` and list them in `config.js → videos`. They cross-fade as visitors scroll (any pickleball footage works; free sources: Pexels, Pixabay, Mixkit; keep each under ~8 MB, 720p). If no video loads, the built-in animated 3D court is used automatically.
+The homepage includes a continuous Three.js rally with two players moving, swinging their paddles, and returning a bouncing ball. The rally runs independently of scrolling. It renders only while visible, respects reduced motion, and has a CSS court fallback when WebGL is unavailable. There is no pause control.
+
+Optional `.mp4` / `.webm` clips can be placed in `assets/videos/` and listed in `config.js → videos`. These play subtly behind the court while it is visible. The list is empty by default so the site does not request missing sample files.
 
 ## 4. Edit your details
 Everything editable (club contact, socials, map, logo, videos) lives in `assets/js/config.js`.
@@ -39,4 +41,9 @@ Replace the contact placeholders (email, phone, address) before publishing.
 Upload the whole folder to GitHub Pages, Netlify, Cloudflare Pages or any static host. Point your domain at it.
 
 ## Tech
-GSAP 3 + ScrollTrigger, three.js r128, Lenis smooth scroll, Font Awesome 6, Google Apps Script. All loaded from CDNs; no build step.
+GSAP 3.12.5 + ScrollTrigger, three.js r128, Lenis 1.0.42, Font Awesome 6.5.2, Google Apps Script. Animation libraries, icons, Manrope and Barlow Condensed fonts are bundled locally; no build step or CDN connection is needed to render the interface. Third-party notices and licenses are included beside these assets.
+
+## UI verification
+Install the development dependency with `npm install`, then run `npm test`. On Windows the suite uses installed Microsoft Edge. On other systems, run `npx playwright install chromium` first. Set `PLAYWRIGHT_CHANNEL` to choose another installed Chromium browser.
+
+The suite checks all six pages at 320, 390, 768 and 1440 pixels, keyboard menus/dialogs, required-field validation, demo booking/contact/admin flows, news search, reduced motion, and continuous rally animation. It writes review screenshots to the system temporary directory under `apc-ui-review`. Submission tests use isolated browser storage and require demo mode; they do not send live messages or reservations.

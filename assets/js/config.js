@@ -34,11 +34,8 @@ window.APC = {
         Put your own .mp4/.webm files in assets/videos/ and list them here.
         If none load, the site automatically uses a built-in animated
         pickleball court so it never looks empty. */
-  videos: [
-    "assets/videos/hero.mp4",
-    "assets/videos/play.webm"
-  ],
+  videos: [],
 
-  /* 5) Logo image (optional). Leave "" to use the built-in paddle logo. */
-  logo: ""
+  /* 5) Logo image (optional). Leave "" to use the built-in club monogram. */
+  logo: "assets/images/asay-pikol-logo.jpg"
 };

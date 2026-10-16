@@ -24,7 +24,7 @@
         <h3>${esc(s.title)}</h3>
         <div class="meta"><span><i class="fa-solid fa-location-dot"></i>${esc(s.location)}</span><span><i class="fa-solid fa-users"></i>${esc(s.slots)} slots</span><span><i class="fa-solid fa-tag"></i>${esc(s.fee)}</span></div>
         ${s.notes ? `<p style="color:var(--muted);margin-top:10px;font-size:.92rem">${esc(s.notes)}</p>` : ""}</div>
-      <div class="act"><button class="btn sm" data-reserve="${esc(s.id)}" ${open ? "" : "disabled"}><i class="fa-solid fa-hand-point-up"></i> Reserve</button>
+      <div class="act"><button class="btn sm" data-reserve="${esc(s.id)}" ${open ? "" : "disabled"}><i class="fa-solid fa-calendar-check"></i> Reserve</button>
         <button class="btn sm ghost" data-ics="${esc(s.id)}"><i class="fa-regular fa-calendar-plus"></i> Add to calendar</button></div>
     </article>`;
   }
@@ -37,13 +37,7 @@
     .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || String(b.date).localeCompare(String(a.date)));
 
   /* ---------- modal helper ---------- */
-  function modal(id) {
-    const m = $("#" + id); if (!m) return null;
-    const close = () => { m.classList.remove("open"); document.body.style.overflow = ""; };
-    m.addEventListener("click", (e) => { if (e.target === m || e.target.closest(".x")) close(); });
-    document.addEventListener("keydown", (e) => e.key === "Escape" && close());
-    return { open() { m.classList.add("open"); document.body.style.overflow = "hidden"; }, close, el: m };
-  }
+  const modal = window.APCUI.modal;
   function note(el, kind, msg) { el.className = "note show " + kind; el.textContent = msg; }
 
   /* ---------- ICS ---------- */
@@ -87,7 +81,7 @@
     $$("[data-ics]").forEach((b) => b.onclick = () => downloadICS(rows.find((r) => r.id === b.dataset.ics)));
   }
   function openReserve(id) {
-    const s = SCHED.find((r) => r.id === id); if (!s || !resModal) return;
+    const s = SCHED.find((r) => r.id === id); if (!s || !resModal || s.status !== "Open") return;
     $("#resTitle").textContent = s.title;
     $("#resInfo").textContent = (s.type === "One-time" ? U.fmtDate(s.date) : s.day + "s") + " · " + U.fmtTime(s.start) + " – " + U.fmtTime(s.end) + " · " + s.location + " · " + s.fee;
     const f = $("#resForm"); f.sid.value = s.id; f.stitle.value = s.title;
@@ -124,7 +118,7 @@
 
     $("#resForm").addEventListener("submit", async (e) => {
       e.preventDefault(); const f = e.target, n = $("#resNote");
-      if (f.website.value) return;                                  // honeypot
+      if (f.website.value || !f.reportValidity()) return;                                  // honeypot
       const btn = f.querySelector("button[type=submit]"); btn.disabled = true;
       try {
         await API.submit("reserve", { sessionId: f.sid.value, session: f.stitle.value, date: f.date.value, name: f.name.value.trim(), phone: f.phone.value.trim(), email: f.email.value.trim(), players: f.players.value, level: f.level.value, notes: f.notes.value.trim() });
@@ -174,10 +168,10 @@
       <div class="card"><div class="ico b"><i class="fa-solid fa-envelope"></i></div><h3>Email us</h3><p><a href="mailto:${esc(ct.email)}">${esc(ct.email)}</a></p></div>
       <div class="card"><div class="ico"><i class="fa-regular fa-clock"></i></div><h3>Play hours</h3><p>${esc(ct.hours)}</p></div>`;
     if (ct.mapEmbedUrl) $("#map").innerHTML = `<iframe src="${esc(ct.mapEmbedUrl)}" title="Map to ${esc(C.clubName)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:0"></iframe>`;
-    else $("#map").innerHTML = `<div class="empty" style="height:100%;display:grid;place-items:center;border:0"><div><i class="fa-solid fa-map-location-dot" style="font-size:2.4rem;color:var(--ball)"></i><p style="margin-top:10px">Add your Google Maps embed link in <code>config.js</code></p></div></div>`;
+    else $("#map").innerHTML = `<div class="empty" style="height:100%;display:grid;place-items:center;border:0"><div><i class="fa-solid fa-map-location-dot" style="font-size:2.4rem;color:var(--ball)"></i><p style="margin-top:10px">Court directions will be available soon. Contact us before your visit.</p></div></div>`;
     const sb = $("#cSocial"); if (sb) sb.innerHTML = ($("footer .socials") || {}).innerHTML || "";
     $("#cForm").addEventListener("submit", async (e) => {
-      e.preventDefault(); const f = e.target, n = $("#cNote"); if (f.website.value) return;
+      e.preventDefault(); const f = e.target, n = $("#cNote"); if (f.website.value || !f.reportValidity()) return;
       const b = f.querySelector("button[type=submit]"); b.disabled = true;
       try { await API.submit("contact", { name: f.name.value.trim(), email: f.email.value.trim(), phone: f.phone.value.trim(), topic: f.topic.value, message: f.message.value.trim() }); note(n, "ok", "Message sent! We'll get back to you soon."); f.reset(); }
       catch (err) { note(n, "err", "Could not send. Please try again or reach us on social media."); }

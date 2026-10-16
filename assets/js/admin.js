@@ -47,10 +47,8 @@
   }
 
   /* ----- modal form ----- */
-  const modalEl = $("#editModal");
-  const openM = () => { modalEl.classList.add("open"); document.body.style.overflow = "hidden"; };
-  const closeM = () => { modalEl.classList.remove("open"); document.body.style.overflow = ""; };
-  modalEl.addEventListener("click", (e) => { if (e.target === modalEl || e.target.closest(".x")) closeM(); });
+  const editDialog = window.APCUI.modal("editModal");
+  const openM = editDialog.open, closeM = editDialog.close;
 
   function openEdit(row) {
     const isNew = !row; row = row || (tab === "schedule" ? { type: "Weekly", day: "Monday", level: "All Levels", status: "Open", slots: 16, start: "18:00", end: "20:00" } : { category: "News", status: "Published", date: new Date().toISOString().slice(0, 10) });
@@ -69,7 +67,7 @@
     openM();
   }
   $("#editForm").addEventListener("submit", async (e) => {
-    e.preventDefault(); const f = e.target, row = {}; if (f.dataset.id) row.id = f.dataset.id;
+    e.preventDefault(); const f = e.target, row = {}; if (!f.reportValidity()) return; if (f.dataset.id) row.id = f.dataset.id;
     F[tab].forEach(([k, , kind]) => { const el = f.elements[k]; row[k] = kind === "check" ? (el.checked ? "yes" : "") : el.value.trim(); });
     if (tab === "schedule") { if (row.type === "One-time") { row.day = ""; if (!row.date) return alert("Please pick a date."); } else row.date = ""; }
     const btn = f.querySelector("button[type=submit]"); btn.disabled = true;

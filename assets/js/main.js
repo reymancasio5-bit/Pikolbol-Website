@@ -13,10 +13,28 @@
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   window.esc = esc;
 
+  // Animate ordinary local page links without replacing the site's navigation.
+  let departure = null;
+  const resetNavigation = () => {
+    clearTimeout(departure); departure = null;
+    document.documentElement.classList.remove("page-leaving");
+  };
+  addEventListener("pageshow", resetNavigation);
+  document.addEventListener("click", event => {
+    const link = event.target.closest("a[href]");
+    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute("download") || (link.target && link.target !== "_self")) return;
+    const url = new URL(link.href, location.href);
+    if (url.origin !== location.origin || !/\.html$/i.test(url.pathname) || (url.pathname === location.pathname && url.search === location.search) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    event.preventDefault();
+    if (departure !== null) return;
+    document.documentElement.classList.add("page-leaving");
+    departure = setTimeout(() => { location.assign(url.href); }, 180);
+  });
+
   /* ---------- shared header / footer ---------- */
   const LOGO = C.logo
     ? `<img src="${esc(C.logo)}" alt="" />`
-    : `<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="27" y="40" width="10" height="20" rx="4" fill="#10151f" stroke="#d9ff3f" stroke-width="2"/><rect x="10" y="4" width="44" height="40" rx="19" fill="#ff7a4d"/><circle cx="32" cy="24" r="9" fill="#d9ff3f"/><circle cx="29" cy="21" r="1.5" fill="#33420a"/><circle cx="35" cy="21" r="1.5" fill="#33420a"/><circle cx="32" cy="27" r="1.5" fill="#33420a"/></svg>`;
+    : `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="1" y="1" width="46" height="46" rx="12" fill="#d9ff3f"/><path d="M14 33V15h11a7 7 0 0 1 0 14h-6m0-9v13" fill="none" stroke="#151914" stroke-width="3" stroke-linecap="square"/></svg>`;
   const NAV = [["index.html", "Home", "home"], ["about.html", "About", "about"], ["schedule.html", "Schedule", "schedule"], ["announcements.html", "News", "announcements"], ["contact.html", "Contact", "contact"]];
 
   function socialLinks() {
@@ -30,13 +48,13 @@
     const brand = C.clubName.replace(/(\S+)$/, "<b>$1</b>");
     document.body.insertAdjacentHTML("afterbegin",
       `<div class="loader" id="loader"><div><div class="ball" style="margin:auto"></div><p>Warming up…</p></div></div>
-       <div id="progress"></div>
+       <a class="skip-link" href="#main">Skip to content</a><div id="progress" aria-hidden="true"></div>
        <canvas id="scene" aria-hidden="true"></canvas><div class="veil"></div>
        <header class="header" id="header"><nav class="nav" aria-label="Main">
          <a class="brand" href="index.html" aria-label="${esc(C.clubName)} home">${LOGO}<span>${brand}</span></a>
-         <div class="menu" id="menu">${NAV.map(([h, t, k]) => `<a href="${h}" class="${k === page ? "active" : ""}">${t}</a>`).join("")}
-           <a class="btn sm" href="schedule.html" style="color:#050805;margin-left:6px"><i class="fa-solid fa-table-tennis-paddle-ball"></i> Play Now</a></div>
-         <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false"><i class="fa-solid fa-bars"></i></button>
+         <div class="menu" id="menu">${NAV.map(([h, t, k]) => `<a href="${h}" class="${k === page ? "active" : ""}" ${k === page ? 'aria-current="page"' : ''}>${t}</a>`).join("")}
+           <a class="btn sm" href="schedule.html" style="color:#050805;margin-left:6px"><i class="fa-solid fa-table-tennis-paddle-ball"></i> Register Now</a></div>
+         <button class="burger" id="burger" aria-label="Open menu" aria-controls="menu" aria-expanded="false"><span class="burger-lines" aria-hidden="true"><span></span><span></span><span></span></span></button>
        </nav></header>`);
 
     const ct = C.contact;
@@ -55,15 +73,40 @@
 
     if (API.demo) document.body.insertAdjacentHTML("beforeend", `<button class="demo-bar" id="demoBar" title="Demo mode: sample data. Connect Google Sheets in assets/js/config.js. Click to hide."><i class="fa-solid fa-flask"></i> Demo mode</button>`);
 
-    const db = $("#demoBar"); if (db) db.addEventListener("click", () => db.remove());
+    const db = $("#demoBar"); if (db) { $("footer .copy").append(db); db.addEventListener("click", () => db.remove()); }
     const burger = $("#burger"), menu = $("#menu");
-    burger.addEventListener("click", () => {
-      const o = menu.classList.toggle("open");
+    const desktopMenu = matchMedia("(min-width:901px)");
+    menu.inert = !desktopMenu.matches;
+    $$("a", menu).forEach((link, index) => link.style.setProperty("--menu-index", index));
+    new ResizeObserver(() => {
+      document.documentElement.style.setProperty("--nav-height", $("#header").getBoundingClientRect().height + "px");
+    }).observe($("#header"));
+    const setMenu = (o) => {
+      menu.classList.toggle("open", o);
+      menu.inert = !o && !desktopMenu.matches;
       burger.setAttribute("aria-expanded", o);
-      burger.innerHTML = `<i class="fa-solid ${o ? "fa-xmark" : "fa-bars"}"></i>`;
+      burger.setAttribute("aria-label", o ? "Close menu" : "Open menu");
+      if (!o && menu.contains(document.activeElement)) burger.focus({ preventScroll: true });
       document.body.style.overflow = o ? "hidden" : "";
+      $("#main").inert = o; $("footer").inert = o;
+      if (lenis) o ? lenis.stop() : lenis.start();
+    };
+    burger.addEventListener("click", () => setMenu(!menu.classList.contains("open")));
+    document.addEventListener("keydown", (e) => {
+      if (!menu.classList.contains("open")) return;
+      if (e.key === "Escape") { setMenu(false); burger.focus(); }
+      if (e.key === "Tab") {
+        const links = $$("a", menu), first = links[0];
+        if (!e.shiftKey && document.activeElement === burger) { e.preventDefault(); first.focus(); }
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); burger.focus(); }
+      }
     });
-    $$("#menu a").forEach((a) => a.addEventListener("click", () => { menu.classList.remove("open"); document.body.style.overflow = ""; }));
+    $$("#menu a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
+    desktopMenu.addEventListener("change", () => setMenu(false));
+    addEventListener("pageshow", () => { if (menu.classList.contains("open")) setMenu(false); });
+    const stage = $(".hero-visual");
+    if (stage) stage.prepend($("#scene"));
+    else $("#scene").remove();
   }
 
   /* ---------- text split ---------- */
@@ -80,99 +123,78 @@
   /* ---------- GSAP ---------- */
   let scene = null, lenis = null;
   function motion() {
-    if (!window.gsap || !window.ScrollTrigger) { $$("[data-r]").forEach((e) => (e.style.opacity = 1)); return; }
-    gsap.registerPlugin(ScrollTrigger);
-
-    // smooth scroll (desktop / trackpad); native on touch
-    if (window.Lenis && !reduce) {
-      lenis = new Lenis({ duration: 1.15, smoothWheel: true, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
-      lenis.on("scroll", ScrollTrigger.update);
-      gsap.ticker.add((t) => lenis.raf(t * 1000)); gsap.ticker.lagSmoothing(0);
+    const counters = () => $$('[data-count]').forEach(el => { el.textContent = Number(el.dataset.count).toLocaleString() + (el.dataset.suffix || ''); });
+    const canvas = $('#scene');
+    if (canvas && window.APCScene) scene = APCScene.init(canvas);
+    if (!window.gsap || !window.ScrollTrigger || reduce) {
+      $$('[data-r]').forEach(el => { el.style.opacity = 1; });
+      counters(); return;
     }
-    $$('a[href^="#"]').forEach((a) => a.addEventListener("click", (e) => {
-      const t = $(a.getAttribute("href")); if (!t) return; e.preventDefault();
-      lenis ? lenis.scrollTo(t, { offset: -70 }) : t.scrollIntoView({ behavior: "smooth" });
-    }));
-
-    // 3D / video scene
-    scene = window.APCScene && APCScene.init($("#scene"));
-    ScrollTrigger.create({ start: 0, end: "max", onUpdate: (self) => { if (scene) scene.state.p = self.progress; $("#progress").style.transform = `scaleX(${self.progress})`; } });
-    $$("[data-tint]").forEach((el) => ScrollTrigger.create({ trigger: el, start: "top 60%", end: "bottom 40%", onToggle: (s) => s.isActive && scene && scene.setTint(el.dataset.tint) }));
-    if (scene) scene.setTint(($("[data-tint]") || {}).dataset ? $("[data-tint]").dataset.tint : "none");
-
-    // header hide on scroll down
-    const header = $("#header"); let lastY = 0;
-    ScrollTrigger.create({ start: 0, end: "max", onUpdate: (s) => {
-      const y = s.scroll(); header.classList.toggle("scrolled", y > 30);
-      header.classList.toggle("hide", y > lastY && y > 400 && !$("#menu").classList.contains("open")); lastY = y;
-    } });
-
-    if (reduce) { $$("[data-r]").forEach((e) => (e.style.opacity = 1)); return; }
-
-    // hero text
-    $$("[data-split]").forEach((el) => {
-      const chars = split(el);
-      gsap.from(chars, { yPercent: 120, rotate: 8, opacity: 0, duration: 1, ease: "back.out(1.7)", stagger: 0.025, delay: 0.5 });
+    gsap.registerPlugin(ScrollTrigger);
+    if (window.Lenis && matchMedia('(hover:hover) and (pointer:fine)').matches) {
+      lenis = new Lenis({ duration: 0.85, smoothWheel: true });
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add(t => lenis.raf(t * 1000));
+    }
+    ScrollTrigger.create({ start: 0, end: 'max', onUpdate: self => {
+      $('#progress').style.transform = 'scaleX(' + self.progress + ')';
+      $('#header').classList.toggle('scrolled', self.scroll() > 24);
+    }});
+    gsap.from('.hero-copy > *, .page-hero .wrap > *', { y: 22, autoAlpha: 0, duration: 0.75, stagger: 0.08, ease: 'power3.out', clearProps: 'all' });
+    if ($('.hero-aside')) gsap.from('.hero-aside', { y: 24, autoAlpha: 0, duration: 0.9, delay: 0.15, ease: 'power3.out', clearProps: 'all' });
+    const reveal = (el, stagger = 0) => gsap.from(el, { y: 24, autoAlpha: 0, duration: 0.65, stagger, ease: 'power2.out', clearProps: 'transform,opacity,visibility', scrollTrigger: { trigger: Array.isArray(el) ? el[0]?.parentElement : el, start: 'top 94%', toggleActions: 'play none none reverse' } });
+    $$('[data-r], [data-title]').forEach(el => reveal(el));
+    $$('[data-stagger]').forEach(el => { if (el.children.length) reveal(Array.from(el.children), 0.06); });
+    $$('[data-count]').forEach(el => {
+      const o = { value: 0 };
+      gsap.to(o, { value: Number(el.dataset.count), duration: 1.2, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 95%', once: true }, onUpdate: () => { el.textContent = Math.round(o.value).toLocaleString() + (el.dataset.suffix || ''); } });
     });
-    const intro = (sel, vars) => { const t = $$(sel); if (t.length) gsap.from(t, vars); };
-    intro(".hero .eyebrow,.page-hero .eyebrow", { y: 20, opacity: 0, duration: 0.8, delay: 0.3 });
-    intro(".hero .lead,.page-hero .lead", { y: 30, opacity: 0, duration: 0.9, delay: 1.0 });
-    intro(".hero .cta .btn", { y: 30, opacity: 0, duration: 0.7, stagger: 0.12, delay: 1.2, ease: "back.out(1.6)" });
-    intro(".next-card", { x: 60, opacity: 0, duration: 1, delay: 1.3, ease: "power3.out" });
-
-    // hero parallax out
-    $$(".hero .wrap, .page-hero .wrap").forEach((w) => gsap.to(w, { yPercent: -18, opacity: 0.15, ease: "none", scrollTrigger: { trigger: w.closest("section"), start: "top top", end: "bottom top", scrub: true } }));
-
-    // generic reveals
-    $$("[data-r]").forEach((el) => {
-      const kind = el.dataset.r, from = { opacity: 0, duration: 0.9, ease: "power3.out" };
-      if (kind === "left") from.x = -70; else if (kind === "right") from.x = 70; else if (kind === "zoom") { from.scale = 0.88; } else from.y = 56;
-      gsap.from(el, Object.assign(from, { scrollTrigger: { trigger: el, start: "top 88%", once: true } }));
-    });
-    // staggered groups
-    $$("[data-stagger]").forEach((g) => {
-      const kids = Array.from(g.children);
-      gsap.from(kids, { y: 60, opacity: 0, duration: 0.8, stagger: 0.1, ease: "power3.out", scrollTrigger: { trigger: g, start: "top 85%", once: true } });
-    });
-    // section titles
-    $$("[data-title]").forEach((h) => {
-      const chars = split(h);
-      gsap.from(chars, { yPercent: 110, opacity: 0, duration: 0.8, stagger: 0.02, ease: "power4.out", scrollTrigger: { trigger: h, start: "top 88%", once: true } });
-    });
-    // counters
-    $$("[data-count]").forEach((el) => {
-      const end = +el.dataset.count, o = { v: 0 };
-      gsap.to(o, { v: end, duration: 2, ease: "power2.out", scrollTrigger: { trigger: el, start: "top 90%", once: true }, onUpdate: () => (el.textContent = Math.round(o.v).toLocaleString() + (el.dataset.suffix || "")) });
-    });
-    // marquee
-    $$(".marquee .track").forEach((t) => {
-      t.innerHTML += t.innerHTML;
-      const tw = gsap.to(t, { xPercent: -50, repeat: -1, duration: 28, ease: "none" });
-      ScrollTrigger.create({ onUpdate: (s) => gsap.to(tw, { timeScale: 1 + Math.abs(s.getVelocity()) / 400, duration: 0.2, overwrite: true, onComplete: () => gsap.to(tw, { timeScale: 1, duration: 1 }) }) });
-    });
-    // floating court ball
-    $$(".court .pb").forEach((b) => {
-      gsap.to(b, { keyframes: [{ left: "62%", top: "70%" }, { left: "34%", top: "42%" }, { left: "64%", top: "22%" }, { left: "30%", top: "20%" }], duration: 6, repeat: -1, ease: "sine.inOut" });
-    });
-    // magnetic buttons (pointer devices only)
-    if (matchMedia("(pointer:fine)").matches) $$(".btn").forEach((b) => {
-      b.addEventListener("pointermove", (e) => { const r = b.getBoundingClientRect(); gsap.to(b, { x: (e.clientX - r.left - r.width / 2) * 0.25, y: (e.clientY - r.top - r.height / 2) * 0.35, duration: 0.3 }); });
-      b.addEventListener("pointerleave", () => gsap.to(b, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1,.4)" }));
-      });
-    // card tilt
-    if (matchMedia("(pointer:fine)").matches) $$(".card").forEach((c) => {
-      c.addEventListener("pointermove", (e) => { const r = c.getBoundingClientRect(); const px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5; gsap.to(c, { rotationY: px * 8, rotationX: -py * 8, transformPerspective: 800, duration: 0.4 }); });
-      c.addEventListener("pointerleave", () => gsap.to(c, { rotationX: 0, rotationY: 0, duration: 0.6 }));
-    });
+    document.fonts?.ready.then(() => ScrollTrigger.refresh());
   }
 
-  /* re-run reveal for content added after fetch */
   window.refreshMotion = function (root) {
-    if (!window.gsap || reduce) { $$("[data-r]", root).forEach((e) => (e.style.opacity = 1)); return; }
+    if (!window.gsap || !window.ScrollTrigger || reduce) return;
     const kids = Array.from(root.children);
-    gsap.fromTo(kids, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, stagger: 0.07, ease: "power3.out", clearProps: "transform", scrollTrigger: { trigger: root, start: "top 90%", once: true } });
-    if (window.ScrollTrigger) setTimeout(() => ScrollTrigger.refresh(), 100);
+    if (!kids.length) return;
+    gsap.fromTo(kids, { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, stagger: 0.04, ease: 'power2.out', clearProps: 'transform,opacity', scrollTrigger: { trigger: root, start: 'top 96%', once: true } });
+    requestAnimationFrame(() => ScrollTrigger.refresh());
   };
+
+  // One accessible dialog behavior for booking, news and owner forms.
+  const dialogs = new WeakMap();
+  function modal(id) {
+    const el = $('#' + id); if (!el) return null;
+    if (dialogs.has(el)) return dialogs.get(el);
+    let previous, blocked = [];
+    el.setAttribute('aria-hidden', 'true');
+    el.querySelector('.box').setAttribute('data-lenis-prevent', '');
+    const focusable = () => $$('button, a[href], input:not([type=hidden]), select, textarea, [tabindex="0"]', el).filter(e => !e.disabled && e.tabIndex >= 0 && e.getClientRects().length);
+    const close = () => {
+      if (!el.classList.contains('open')) return;
+      el.classList.remove('open'); el.setAttribute('aria-hidden', 'true');
+      blocked.forEach(e => { e.inert = false; }); blocked = [];
+      document.body.style.overflow = ''; lenis?.start();
+      if (previous?.isConnected) previous.focus({ preventScroll: true });
+    };
+    const open = () => {
+      previous = document.activeElement;
+      blocked = [...$$('main > *'), $('#header'), $('footer')].filter(e => e && e !== el && !e.contains(el) && !e.inert);
+      blocked.forEach(e => { e.inert = true; });
+      el.classList.add('open'); el.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden'; lenis?.stop();
+      focusable()[0]?.focus({ preventScroll: true });
+    };
+    el.addEventListener('click', e => { if (e.target === el || e.target.closest('.x')) close(); });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { e.preventDefault(); close(); }
+      if (e.key !== 'Tab') return;
+      const items = focusable(), first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+    });
+    const api = { open, close, el }; dialogs.set(el, api); return api;
+  }
+  window.APCUI = { modal };
 
   /* ---------- date / time helpers (shared) ---------- */
   const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -190,10 +212,10 @@
   /* ---------- boot ---------- */
   buildChrome();
   const start = () => {
-    motion();
-    const L = $("#loader"); setTimeout(() => L && L.classList.add("done"), 350);
+    try { motion(); } catch (error) { console.warn("Motion unavailable", error); $$("[data-r]").forEach(el => { el.style.opacity = 1; }); }
+    const L = $("#loader"); L && L.classList.add("done");
     document.dispatchEvent(new Event("apc:ready"));
   };
-  if (document.readyState === "complete") start(); else addEventListener("load", start);
+  if (document.readyState !== "loading") start(); else document.addEventListener("DOMContentLoaded", start, { once: true });
   setTimeout(() => { const L = $("#loader"); L && L.classList.add("done"); }, 4500);    // never block the page
 })();
