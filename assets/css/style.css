@@ -419,9 +419,9 @@ body[data-page="home"] .hero .cta{gap:10px;margin-top:28px}
 body[data-page="home"] .hero-proof{gap:12px 18px;margin-top:26px;font-size:.68rem;color:var(--muted)}
 body[data-page="home"] .hero-proof span{width:auto}
 body[data-page="home"] .hero-aside-note{font-size:.72rem;margin:16px 0 0}
-.hero-visual{height:clamp(260px,28vw,390px);position:relative;overflow:hidden;border:1px solid var(--line);border-radius:16px 16px 0 0;background:radial-gradient(ellipse at 50% 70%,#303c29,#181e18 70%)}
+.hero-visual{height:clamp(260px,28vw,390px);position:relative;overflow:hidden;border:1px solid rgba(232,241,219,.2);border-radius:16px 16px 0 0;background:radial-gradient(ellipse at 50% 70%,rgba(48,60,41,.38),rgba(24,30,24,.52) 70%);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
 #scene{position:absolute;inset:0;width:100%;height:100%;z-index:1;background:transparent}
-.visual-caption{position:absolute;inset:20px 22px auto;display:flex;justify-content:space-between;gap:14px;font-size:.6rem;color:#b5bfae;letter-spacing:.04em;z-index:2;pointer-events:none}
+.visual-caption{position:absolute;inset:20px 22px auto;display:flex;justify-content:space-between;gap:14px;font-size:.6rem;color:#d5dfcf;letter-spacing:.04em;z-index:2;pointer-events:none}
 .visual-caption>span:last-child{font-size:.55rem;letter-spacing:.13em;white-space:nowrap}
 .status-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--ball);margin-right:6px;vertical-align:middle}
 .court-fallback{position:absolute;inset:70px 60px 45px;transform:rotate(-20deg)}
@@ -429,7 +429,7 @@ body[data-page="home"] .hero-aside-note{font-size:.72rem;margin:16px 0 0}
 .webgl-ready .court-fallback{display:none}
 .scene-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1s;pointer-events:none}
 .scene-video.active{opacity:.16}
-body[data-page="home"] .next-card{border-radius:0 0 16px 16px;padding:24px 28px;background:#1e241c;border:1px solid var(--line);border-top:0;box-shadow:none;backdrop-filter:none}
+body[data-page="home"] .next-card{border-radius:0 0 16px 16px;padding:24px 28px;background:linear-gradient(150deg,rgba(30,36,28,.72),rgba(18,25,17,.82));border:1px solid rgba(232,241,219,.2);border-top:0;box-shadow:none;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
 body[data-page="home"] .next-card::before,body[data-page="home"] .next-card::after{display:none}
 body[data-page="home"] .next-card h3{font-size:1.4rem;max-width:none;margin:9px 0}
 .next-card small{font-size:.6rem;letter-spacing:.15em}
