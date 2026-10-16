@@ -32,6 +32,19 @@ test('mobile menu closes with Escape and restores its toggle state', async () =>
   await p.close();
 });
 
+test('mobile menu fully covers the footer logo when opened near the bottom', async () => {
+  const p = await pageAt('about', 390);
+  await p.evaluate(() => scrollTo(0, document.querySelector('footer').offsetTop - 160));
+  await p.locator('#burger').click();
+  const covered = await p.screenshot();
+  await p.locator('footer .brand').evaluate(el => { el.style.visibility = 'hidden'; });
+  const hidden = await p.screenshot();
+  assert.equal(covered.equals(hidden), true, 'footer logo must already be hidden behind the menu');
+  await p.locator('footer .brand').evaluate(el => { el.style.visibility = ''; });
+  await p.screenshot({ path: path.join(require('node:os').tmpdir(), 'apc-footer-menu-layering.png') });
+  await p.close();
+});
+
 test('mobile menu remains safe through rapid toggles and viewport changes', async () => {
   const p = await browser.newPage({ viewport: { width: 390, height: 900 } });
   await p.goto(base + '/about.html');
