@@ -9,7 +9,7 @@ window.APC = {
   /* 1) Paste your Google Apps Script Web App URL here (see README.md).
         While this is empty the site runs in DEMO MODE:
         sample data + admin changes saved only in this browser. */
-  apiUrl: "",
+  apiUrl: "https://script.google.com/macros/s/AKfycbxKXTor-MV5mfU-ZSylhEAiE2nB8NiIhxYodi6Hnl58viSDdEnXMAnaaX6DYeAHq2ie/exec",
 
   /* 2) Contact details — replace with the club's real info. */
   contact: {
