@@ -13,21 +13,21 @@ window.APC = {
 
   /* 2) Contact details — replace with the club's real info. */
   contact: {
-    email: "hello@asaypikol.club",
-    phone: "+63 900 000 0000",
-    whatsapp: "639000000000",            // digits only, with country code
-    address: "Your court address, City, Philippines",
+    email: "asaypikol2026@gmail.com",
+    phone: "+63 910 090 9991",
+    whatsapp: "",            // digits only, with country code
+    address: "Tandag City, Philippines",
     hours: "Open play daily — see Schedule",
     mapEmbedUrl: ""                      // Google Maps > Share > Embed a map > copy the src="..." link
   },
 
   /* 3) Social links. Leave "" to hide an icon. */
   social: {
-    facebook: "https://facebook.com/",
-    instagram: "https://instagram.com/",
+    facebook: "https://www.facebook.com/profile.php?id=61595213673952",
+    instagram: "",
     tiktok: "",
     youtube: "",
-    messenger: ""
+    messenger: "https://www.facebook.com/messages/t/933293642918205"
   },
 
   /* 4) Background videos used by the 3D scene (tried in order).
